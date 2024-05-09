@@ -4,38 +4,43 @@ const { BASE_URL } = require("../utils/constant");
 
 const getKomik = (endpoint) => {
   return new Promise(async (resolve, reject) => {
-    const response = await axios.get(BASE_URL + "daftar-komik/" + endpoint);
-    const $ = cheerio.load(response.data);
+    try {
+      const response = await axios.get(BASE_URL + "daftar-komik/" + endpoint);
+      const $ = cheerio.load(response.data);
 
-    const komik = $(".list-update")
-      .find(".list-update_items-wrapper")
-      .find(".list-update_item");
-    const result = [];
-    komik.each(function () {
-      const slug = $(this).find("a").attr("href");
-      if (slug === undefined) {
-        console.log("slug undefined");
-        console.log($(this).find("h3.title").text());
-      }
-      result.push({
-        title: $(this).find("h3.title").text(),
-        thumb: $(this).find("img").attr("src"),
-        slug:
-          $(this).find(".data-tooltip").attr("href").split("/")[4] ??
-          "tidak ada",
-        chapter: $(this).find(".chapter").text().replace("Ch.", "").trim(),
-        rating: $(this).find(".numscore").text(),
+      const komik = $(".list-update")
+        .find(".list-update_items-wrapper")
+        .find(".list-update_item");
+      const result = [];
+      komik.each(function () {
+        const slug = $(this).find("a").attr("href");
+        if (slug === undefined) {
+          console.log("slug undefined");
+          console.log($(this).find("h3.title").text());
+        }
+        result.push({
+          title: $(this).find("h3.title").text(),
+          thumb: $(this).find("img").attr("src"),
+          slug:
+            $(this).find(".data-tooltip").attr("href").split("/")[4] ??
+            "tidak ada",
+          chapter: $(this).find(".chapter").text().replace("Ch.", "").trim(),
+          rating: $(this).find(".numscore").text(),
 
-        type: $(this).find(".type").text(),
-        slugChapter:
-          $(this).find(".chapter").attr("href").split("/")[4] ?? "tidak ada",
+          type: $(this).find(".type").text(),
+          slugChapter:
+            $(this).find(".chapter").attr("href").split("/")[4] ?? "tidak ada",
+        });
       });
-    });
 
-    resolve({
-      data: result,
-      total: $(".pagination").find("a").eq(-2).text(),
-    });
+      resolve({
+        data: result,
+        total: $(".pagination").find("a").eq(-2).text(),
+      });
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
   });
 };
 
